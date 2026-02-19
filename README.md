@@ -11,7 +11,7 @@ insurance-premium-predictor/
 ├── ml_model.ipynb       # Data preprocessing, feature engineering & model training
 ├── main.py              # FastAPI backend server
 ├── frontend.py          # Streamlit UI
-├── pipeline.pkl         # Serialized sklearn Pipeline (preprocessor + classifier)
+├── pipeline.pkl         # Serialized sklearn Pipeline (preprocessor + classifier, not committed)
 ├── insurance.csv        # Raw training dataset
 ├── pyproject.toml       # Project dependencies managed by uv
 ├── .venv/               # Virtual environment (managed by uv, not committed)
@@ -70,8 +70,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/ArunAryal/insurance-premium-category-predictor.git
-cd insurance-premium-category-predictor
+git clone https://github.com/ArunAryal/InsurancePremiumCategoryPredictor
+cd InsurancePremiumCategoryPredictor
 ```
 
 ### 2. Set up the environment
