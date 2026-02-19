@@ -11,3 +11,6 @@ wheels/
 
 # ML Pipeline
 pipeline.pkl
+
+#dot env
+.env

@@ -1,7 +1,10 @@
 import streamlit as st
 import requests
+from dotenv import load_dotenv
+import os
 
-API_URL='http://localhost:8000/predict'
+load_dotenv()
+API_URL=os.getenv("API_URL")
 
 st.title("Insurance Premium Category Predictor")
 st.markdown('Enter your details below:')

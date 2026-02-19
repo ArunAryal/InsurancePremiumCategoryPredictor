@@ -31,6 +31,7 @@ insurance-premium-predictor/
 | Frontend | Streamlit |
 | Data | Pandas, NumPy |
 | Serialization | Pickle |
+| Configuration | python-dotenv |
 
 ---
 
@@ -80,16 +81,22 @@ uv sync
 ```
 This will create a `.venv` and install all dependencies from `pyproject.toml`.
 
-### 3. Train the model (optional — as `pipeline.pkl` is already present)
+### 3. Configure environment variables
+Create a `.env` file in the project root:
+```
+API_URL=http://localhost:8000/predict
+```
+
+### 4. Train the model
 Open and run all cells in `ml_model.ipynb`. This will generate `pipeline.pkl`.
 
-### 4. Run the backend
+### 5. Run the backend
 ```bash
 uv run uvicorn main:app --reload
 ```
 FastAPI will be available at `http://localhost:8000`. You can explore the auto-generated API docs at `http://localhost:8000/docs`.
 
-### 5. Run the frontend (in a separate terminal)
+### 6. Run the frontend (in a separate terminal)
 ```bash
 uv run streamlit run frontend.py
 ```
