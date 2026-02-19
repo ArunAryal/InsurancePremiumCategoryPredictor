@@ -7,14 +7,24 @@ A machine learning web application that predicts insurance premium categories ba
 ## 📁 Project Structure
 
 ```
-insurance-premium-predictor/
-├── ml_model.ipynb       # Data preprocessing, feature engineering & model training
-├── main.py              # FastAPI backend server
-├── frontend.py          # Streamlit UI
-├── pipeline.pkl         # Serialized sklearn Pipeline (preprocessor + classifier, not committed)
-├── insurance.csv        # Raw training dataset
-├── pyproject.toml       # Project dependencies managed by uv
-├── .venv/               # Virtual environment (managed by uv, not committed)
+InsurancePremiumPredictor/
+├── config/
+│   └── city_tier.py            # Tier 1 and Tier 2 city lists
+├── frontend/
+│   └── frontend.py             # Streamlit UI
+├── model/
+│   ├── insurance.csv           # Raw training dataset
+│   ├── ml_model.ipynb          # Feature engineering & model training
+│   ├── pipeline.pkl            # Serialized sklearn Pipeline (not committed)
+│   └── predict.py              # Prediction logic & pipeline loader
+├── schema/
+│   ├── user_input.py           # Pydantic input validation model
+│   └── prediction_response.py  # Pydantic response model
+├── main.py                     # FastAPI app & route definitions
+├── pyproject.toml              # Project dependencies managed by uv
+├── .env                        # Environment variables (not committed)
+├── .python-version             # Python version pin
+├── uv.lock                     # Locked dependency versions
 └── README.md
 ```
 
@@ -47,6 +57,8 @@ Raw user inputs are transformed into engineered features before being fed to the
 | `smoker` + `bmi` | `lifestyle_risk` | low / medium / high |
 | `city` | `city_tier` | 1 (metro) / 2 (tier-2) / 3 (rest) |
 
+City names are automatically normalized (stripped and title-cased) via a Pydantic `@field_validator`, so inputs like `"mumbai"` or `" Mumbai "` are handled gracefully.
+
 The trained object exported as `pipeline.pkl` is a full **sklearn Pipeline** — it contains both the `ColumnTransformer` (with OneHotEncoder) and the `RandomForestClassifier`. This means encoding and prediction happen in a single `pipeline.predict()` call.
 
 ### Request Flow
@@ -55,7 +67,7 @@ User fills Streamlit form
     → POST /predict (JSON with 7 raw fields)
     → FastAPI validates input via Pydantic (computes engineered features automatically)
     → pipeline.predict() runs OHE + RandomForest internally
-    → Returns predicted category (low / medium / high)
+    → Returns predicted category + confidence score + class probabilities
     → Streamlit displays result
 ```
 
@@ -88,7 +100,7 @@ API_URL=http://localhost:8000/predict
 ```
 
 ### 4. Train the model
-Open and run all cells in `ml_model.ipynb`. This will generate `pipeline.pkl`.
+Open and run all cells in `model/ml_model.ipynb`. This will generate `model/pipeline.pkl`.
 
 ### 5. Run the backend
 ```bash
@@ -98,7 +110,7 @@ FastAPI will be available at `http://localhost:8000`. You can explore the auto-g
 
 ### 6. Run the frontend (in a separate terminal)
 ```bash
-uv run streamlit run frontend.py
+uv run streamlit run frontend/frontend.py
 ```
 The app will open in your browser at `http://localhost:8501`.
 
@@ -107,6 +119,32 @@ The app will open in your browser at `http://localhost:8501`.
 ---
 
 ## 📬 API Reference
+
+### `GET /`
+Returns a human-readable message confirming the API is running.
+
+**Response:**
+```json
+{
+  "message": "Insurance Premium Prediction API"
+}
+```
+
+---
+
+### `GET /health`
+Machine-readable health check. Useful for monitoring and deployment pipelines.
+
+**Response:**
+```json
+{
+  "status": "OK",
+  "version": "1.0.0",
+  "model_loaded": true
+}
+```
+
+---
 
 ### `POST /predict`
 
@@ -126,8 +164,12 @@ The app will open in your browser at `http://localhost:8501`.
 **Response:**
 ```json
 {
-  "response": {
-    "predicted_category": "low"
+  "predicted_category": "low",
+  "confidence": 0.87,
+  "class_probablities": {
+    "high": 0.05,
+    "low": 0.87,
+    "medium": 0.08
   }
 }
 ```
